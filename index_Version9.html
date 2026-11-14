@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Futbol Yıldızı</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 18px;
+      color: #202b38;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(160deg, #2675c2, #10243d 70%);
+    }
+
+    .game {
+      max-width: 1100px;
+      margin: auto;
+      overflow: hidden;
+      border: 5px solid #14243a;
+      border-radius: 18px;
+      background: #f5f0df;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.72);
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 20px;
+      color: white;
+      background: linear-gradient(#365c82, #172f4a);
+    }
+
+    header h1 {
+      margin: 0;
+      color: #ffdc53;
+      font-size: clamp(22px, 5vw, 36px);
+      text-shadow: 2px 3px #151515;
+    }
+
+    .wallet {
+      text-align: right;
+      line-height: 1.7;
+      white-space: nowrap;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #d3d9dd;
+    }
+
+    nav button {
+      flex: 1;
+      min-height: 42px;
+      border: 2px solid #273951;
+      border-radius: 9px;
+      background: linear-gradient(#527da7, #294765);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #15283d;
+    }
+
+    nav button.active {
+      background: linear-gradient(#f3bd46, #c47e16);
+      color: #1c1c1c;
+    }
+
+    main { padding: 14px; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .columns {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.9fr) minmax(330px, 1.5fr);
+      gap: 14px;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 16px;
+      border: 3px solid #66788c;
+      border-radius: 13px;
+      background: #fffdf6;
+      box-shadow: inset 0 0 0 3px #e1e2dd;
+    }
+
+    h2 { margin-top: 0; }
+
+    .player-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 105px;
+      height: 125px;
+      flex: 0 0 105px;
+      border: 4px solid #263d59;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #ffc19c, #d96f58);
+      font-size: 68px;
+    }
+
+    .player-info h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .player-info input {
+      width: 100%;
+      max-width: 190px;
+      padding: 7px;
+      border: 1px solid #8997a4;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .stat { margin: 12px 0; }
+
+    .stat-heading {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .bar {
+      height: 17px;
+      overflow: hidden;
+      border: 2px solid #39485a;
+      border-radius: 8px;
+      background: #c5cbd0;
+    }
+
+    .fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffae21, #ffe34e, #6ed45d);
+      transition: width 250ms ease;
+    }
+
+    .button-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    button, select, input[type="color"] {
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 2px solid #273951;
+      border-radius: 9px;
+      font-size: 15px;
+    }
+
+    button {
+      color: white;
+      background: linear-gradient(#527da7, #294765);
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #15283d;
+    }
+
+    button:hover { filter: brightness(1.08); }
+    button:active { transform: translateY(2px); }
+    button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    select { width: 100%; background: white; }
+
+    .green-button {
+      color: #203319;
+      background: linear-gradient(#d5f377, #77bf3d);
+    }
+
+    .gold-button {
+      color: #382608;
+      background: linear-gradient(#ffe888, #e1a82b);
+    }
+
+    .match-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin: 12px 0;
+    }
+
+    .match-controls label {
+      display: grid;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .match-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .match-buttons button { flex: 1; }
+
+    .live-score {
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 8px;
+      color: white;
+      background: #20364e;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .pitch-wrap {
+      overflow: hidden;
+      border: 4px solid #dce7f5;
+      border-radius: 11px;
+      background: #187b3c;
+    }
+
+    canvas { display: block; width: 100%; height: auto; }
+
+    .result {
+      min-height: 72px;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 9px;
+      background: #e8edf2;
+      line-height: 1.5;
+    }
+
+    .team-grid, .shop-grid, .transfer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
+    .team-card, .shop-card, .transfer-card {
+      padding: 14px;
+      border: 2px solid #8090a1;
+      border-radius: 11px;
+      background: #f7f8f6;
+    }
+
+    .team-card.selected { border: 3px solid #d29621; background: #fff3cc; }
+
+    .team-color {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      margin-right: 7px;
+      border: 1px solid #333;
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+
+    .shop-card button, .transfer-card button { width: 100%; }
+
+    .small-note {
+      color: #56616d;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .event-log, .summary-box, .league-box, .info-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 9px;
+    }
+
+    .event-log {
+      background: #edf2f5;
+      border: 1px solid #b4c0c8;
+    }
+
+    .event-log h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .event-log ul {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .summary-box {
+      background: #fff9e4;
+      border: 2px solid #d7b15b;
+      line-height: 1.6;
+      color: #3f3728;
+    }
+
+    .info-box {
+      background: #eef6ff;
+      border: 2px solid #9db9d6;
+      line-height: 1.6;
+      color: #1f3657;
+    }
+
+    .league-box {
+      background: #f7f8fa;
+      border: 2px solid #b8c3cf;
+      overflow-x: auto;
+    }
+
+    .league-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .league-table th, .league-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #d7dde2;
+      text-align: left;
+    }
+
+    .fixture-list {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .fixture-item {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #eef5f0;
+      border: 1px solid #bfd0c2;
+      font-size: 14px;
+    }
+
+    .customize-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .customize-row label {
+      display: grid;
+      gap: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      padding: 4px;
+      background: white;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mini-card {
+      padding: 10px;
+      border-radius: 10px;
+      background: #f6f1d2;
+      border: 2px solid #d8b868;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .stats-inline {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #2d4054;
+      font-weight: bold;
+    }
+
+    footer {
+      padding: 12px;
+      color: #e7e7e7;
+      background: #20364e;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 8px; }
+      main { padding: 9px; }
+      .columns { grid-template-columns: 1fr; }
+      header { padding: 12px; }
+      nav { padding: 8px; }
+      nav button { padding: 7px 4px; font-size: 13px; }
+      .panel { padding: 12px; }
+      .customize-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="game">
+    <header>
+      <h1>⚽ Futbol Yıldızı</h1>
+      <div class="wallet">
+        <div>🪙 Para: <strong id="coins">30</strong></div>
+        <div>⭐ Tecrübe: <strong id="xp">0</strong></div>
+      </div>
+    </header>
+
+    <nav>
+      <button class="active" data-view="career">Kariyer</button>
+      <button data-view="team">Takım</button>
+      <button data-view="shop">Dükkân</button>
+      <button data-view="transfer">Transfer</button>
+      <button data-view="league">Lig</button>
+    </nav>
+
+    <main>
+      <section class="view active" id="career">
+        <div class="columns">
+          <div class="panel">
+            <div class="player-card">
+              <div class="avatar" id="avatar" aria-label="Futbolcu">🤨</div>
+              <div class="player-info">
+                <h2><input id="playerName" maxlength="20" value="Genç Yetenek" aria-label="Futbolcu adı"></h2>
+                <strong>Seviye <span id="level">1</span> futbolcu</strong>
+                <p class="small-note">Profesyonel olma yolunda ilk adım!</p>
+              </div>
+            </div>
+
+            <div id="stats"></div>
+
+            <h3>🏋️ Antrenman</h3>
+            <div class="button-list">
+              <button data-train="dribbling">Top sürme çalış — 5 🪙</button>
+              <button data-train="shooting">Şut çalış — 5 🪙</button>
+              <button data-train="passing">Pas çalış — 5 🪙</button>
+              <button data-train="speed">Hız çalış — 5 🪙</button>
+              <button data-train="fitness">Kondisyon çalış — 5 🪙</button>
+            </div>
+
+            <div class="info-box" id="playerOverview">
+              Oyuncu gücü ve yetenek bilgisi burada görünecek.
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>📋 Maç</h2>
+            <p>Takımını ve rakibini seç. Oyuncular otomatik oynar.</p>
+
+            <div class="match-controls">
+              <label>Senin takımın<select id="homeTeam"></select></label>
+              <label>Rakip takım<select id="awayTeam"></select></label>
+            </div>
+
+            <div class="match-buttons">
+              <button class="green-button" id="startMatch">Maçı başlat</button>
+              <button id="pauseMatch" hidden>Duraklat</button>
+            </div>
+
+            <div class="live-score" id="matchClock">00:00</div>
+            <div class="live-score" id="liveScore">0 - 0</div>
+
+            <div class="pitch-wrap">
+              <canvas id="pitch" width="900" height="500"></canvas>
+            </div>
+
+            <div class="result" id="result">Takımlar hazır. Maçı başlat!</div>
+
+            <div class="event-log">
+              <h4>Olaylar</h4>
+              <ul id="eventLog"></ul>
+            </div>
+
+            <div class="summary-box" id="performanceSummary">
+              Maç özeti maç bitince burada görünecek.
+            </div>
+
+            <div class="mini-grid">
+              <div class="mini-card">
+                <strong>Takım gücü</strong><br>
+                <span id="teamPowerText">0</span>
+              </div>
+              <div class="mini-card">
+                <strong>En iyi istatistik</strong><br>
+                <span id="bestStatText">-</span>
+              </div>
+              <div class="mini-card">
+                <strong>Sezon hedefi</strong><br>
+                <span id="seasonTargetText">5 maçlık lig</span>
+              </div>
+            </div>
+
+            <p class="small-note">Maç 60 saniyelik oynanışla ilerler. 2× hız seçeneği eklenmiştir.</p>
+            <select id="matchSpeed" aria-label="Maç hızı">
+              <option value="1">Maç hızı: 1×</option>
+              <option value="2">Maç hızı: 2×</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="team">
+        <div class="panel">
+          <h2>🛡️ Takım ve görünüş</h2>
+          <p>Takımını seç, forma rengini ve avatarını değiştir.</p>
+          <div class="team-grid" id="teamCards"></div>
+
+          <div class="customize-row">
+            <label>
+              Forma rengi
+              <input type="color" id="kitColor" value="#168ce5">
+            </label>
+            <label>
+              Futbolcu görünüşü
+              <select id="avatarChoice">
+                <option value="🤨">🤨 Komik</option>
+                <option value="🙂">🙂 Neşeli</option>
+                <option value="😎">😎 Havalı</option>
+                <option value="🧔">🧔 Tecrübeli</option>
+                <option value="👽">👽 Uzaylı</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="info-box" id="teamInfoBox">
+            Takım bilgilendirme alanı.
+          </div>
+
+          <h3>Takım kadrosu</h3>
+          <p id="rosterText" class="small-note"></p>
+        </div>
+      </section>
+
+      <section class="view" id="shop">
+        <div class="panel">
+          <h2>🛍️ Eşya dükkânı</h2>
+          <p>Satın alınan eşyalar futbolcunun özelliklerini artırır.</p>
+          <div class="shop-grid" id="shopItems"></div>
+        </div>
+      </section>
+
+      <section class="view" id="transfer">
+        <div class="panel">
+          <h2>💼 Transfer pazarı</h2>
+          <p>Oyuncuların yeteneklerine göre satın al, takımını güçlendir.</p>
+          <div class="transfer-grid" id="transferMarket"></div>
+        </div>
+      </section>
+
+      <section class="view" id="league">
+        <div class="panel">
+          <div class="league-box">
+            <h2>📊 Lig tablosu</h2>
+            <p id="leagueRound" class="small-note"></p>
+            <table class="league-table" id="leagueTable"></table>
+            <button id="newSeason" class="gold-button" hidden>Yeni sezon başlat</button>
+          </div>
+
+          <div class="league-box">
+            <h2>🗓️ Fikstür</h2>
+            <div class="fixture-list" id="fixtureList"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>Futbol Yıldızı — takımını geliştir, maçlarını kazan!</footer>
+  </div>
+
+  <script>
+    const SAVE_KEY = "footballGameSave_v4";
+
+    const allTeams = [
+      { id: "blue", name: "Mavi Martılar", color: "#168ce5", dark: "#07559a" },
+      { id: "red", name: "Kırmızı Horozlar", color: "#ee4c42", dark: "#a81f26" },
+      { id: "green", name: "Yeşil Kaplumbağalar", color: "#48bd64", dark: "#17723d" },
+      { id: "yellow", name: "Sarı Şimşekler", color: "#f3ca35", dark: "#a17b10" },
+      { id: "purple", name: "Mor Patatesler", color: "#a276d2", dark: "#5e388b" },
+      { id: "orange", name: "Turuncu Tilkiler", color: "#f08c3d", dark: "#a54b1a" }
+    ];
+
+    const statNames = {
+      dribbling: "Top sürme",
+      shooting: "Şut",
+      passing: "Pas",
+      speed: "Hız",
+      fitness: "Kondisyon"
+    };
+
+    const shopItems = [
+      { id: "boots", name: "Turbo krampon", description: "Hız +5", price: 25, stat: "speed", bonus: 5, emoji: "👟" },
+      { id: "shirt", name: "Şanslı forma", description: "Kondisyon +5", price: 20, stat: "fitness", bonus: 5, emoji: "👕" },
+      { id: "ball", name: "Yıldız futbol topu", description: "Şut +5", price: 25, stat: "shooting", bonus: 5, emoji: "⚽" },
+      { id: "gloves", name: "Pas eldiveni", description: "Pas +5", price: 20, stat: "passing", bonus: 5, emoji: "🧤" }
+    ];
+
+    const transferMarket = [
+      { id: "mert", name: "Mert Denli", position: "Orta saha", price: 60, stat: "passing", bonus: 8, emoji: "🧠" },
+      { id: "serhan", name: "Serhan Aksu", position: "Forvet", price: 75, stat: "shooting", bonus: 10, emoji: "⚡" },
+      { id: "ali", name: "Ali Kuru", position: "Kanat", price: 68, stat: "speed", bonus: 9, emoji: "💨" },
+      { id: "cenk", name: "Cenk Yalçıntaş", position: "Defans", price: 55, stat: "fitness", bonus: 8, emoji: "🛡️" },
+      { id: "dora", name: "Dora Efe", position: "Çalımcı", price: 62, stat: "dribbling", bonus: 9, emoji: "🎯" }
+    ];
+
+    function makeEmptyTable() {
+      const table = {};
+      for (const team of allTeams) {
+        table[team.id] = {
+          name: team.name,
+          played: 0,
+          wins: 0,
+          draws: 0,
+          losses: 0,
+          goalsFor: 0,
+          goalsAgainst: 0,
+          points: 0
+        };
+      }
+      return table;
+    }
+
+    const defaultState = {
+      coins: 30,
+      xp: 0,
+      level: 1,
+      playerName: "Genç Yetenek",
+      team: "blue",
+      kitColor: "#168ce5",
+      avatar: "🤨",
+      inventory: [],
+      transfers: [],
+      stats: {
+        dribbling: 35,
+        shooting: 30,
+        passing: 38,
+        speed: 42,
+        fitness: 50
+      },
+      league: {
+        round: 1,
+        currentOpponent: "yellow",
+        table: makeEmptyTable(),
+        results: []
+      }
+    };
+
+    function copyDefaults() {
+      return {
+        ...defaultState,
+        stats: { ...defaultState.stats },
+        inventory: [],
+        transfers: [],
+        league: {
+          round: 1,
+          currentOpponent: "yellow",
+          table: makeEmptyTable(),
+          results: []
+        }
+      };
+    }
+
+    function teamById(id) {
+      return allTeams.find(team => team.id === id) || allTeams[0];
+    }
+
+    function getOpponentForRound(round) {
+      const options = allTeams.filter(team => team.id !== state.team);
+      if (!options.length) return allTeams[0];
+      return options[(round - 1) % options.length];
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+        if (!saved) return copyDefaults();
+
+        const result = {
+          ...copyDefaults(),
+          ...saved,
+          stats: { ...defaultState.stats, ...(saved.stats || {}) },
+          inventory: Array.isArray(saved.inventory) ? saved.inventory : [],
+          transfers: Array.isArray(saved.transfers) ? saved.transfers : [],
+          league: {
+            round: Math.max(1, Number(saved.league?.round) || 1),
+            currentOpponent: saved.league?.currentOpponent || "yellow",
+            table: { ...makeEmptyTable(), ...(saved.league?.table || {}) },
+            results: Array.isArray(saved.league?.results) ? saved.league.results : []
+          }
+        };
+
+        if (!allTeams.some(team => team.id === result.team)) result.team = "blue";
+        if (!allTeams.some(team => team.id === result.league.currentOpponent)) {
+          result.league.currentOpponent = getOpponentForRound(result.league.round).id;
+        }
+
+        return result;
+      } catch {
+        return copyDefaults();
+      }
+    }
+
+    let state = loadState();
+
+    function save() {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      } catch {}
+    }
+
+    function getTransferBonus() {
+      let total = 0;
+      for (const transferId of state.transfers) {
+        const item = transferMarket.find(t => t.id === transferId);
+        if (item) total += item.bonus;
+      }
+      return total;
+    }
+
+    function computePlayerPower() {
+      const stats = state.stats;
+      const bonus = getTransferBonus();
+      const total = (
+        (stats.dribbling || 0) +
+        (stats.shooting || 0) +
+        (stats.passing || 0) +
+        (stats.speed || 0) +
+        (stats.fitness || 0)
+      ) / 5 + bonus;
+      return Math.round(total);
+    }
+
+    function computeTeamPower() {
+      const base = computePlayerPower();
+      const kitBonus = 8;
+      return Math.round(base + kitBonus);
+    }
+
+    function renderStats() {
+      document.getElementById("coins").textContent = state.coins;
+      document.getElementById("xp").textContent = state.xp;
+      document.getElementById("level").textContent = state.level;
+      document.getElementById("playerName").value = state.playerName;
+      document.getElementById("avatar").textContent = state.avatar;
+      document.getElementById("kitColor").value = state.kitColor;
+      document.getElementById("avatarChoice").value = state.avatar;
+
+      const area = document.getElementById("stats");
+      area.innerHTML = "";
+
+      for (const [key, name] of Object.entries(statNames)) {
+        const value = Math.max(0, Math.min(100, Number(state.stats[key]) || 0));
+        area.insertAdjacentHTML("beforeend", `
+          <div class="stat">
+            <div class="stat-heading"><span>${name}</span><span>${value}/100</span></div>
+            <div class="bar"><div class="fill" style="width:${value}%"></div></div>
+          </div>
+        `);
+      }
+
+      const bestStat = Object.entries(state.stats).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById("bestStatText").textContent =
+        bestStat ? `${statNames[bestStat[0]]}: ${bestStat[1]}` : "-";
+
+      const power = computePlayerPower();
+      document.getElementById("playerOverview").innerHTML =
+        `Oyuncu gücü: <strong>${power}</strong><br>` +
+        `Takım gücü: <strong>${computeTeamPower()}</strong><br>` +
+        `Transfer bonusu: +${getTransferBonus()}`;
+
+      document.getElementById("teamPowerText").textContent = computeTeamPower();
+
+      renderTeams();
+      renderShop();
+      renderTransferMarket();
+    }
+
+    function renderTeams() {
+      const area = document.getElementById("teamCards");
+      area.innerHTML = "";
+
+      for (const team of allTeams) {
+        const selected = state.team === team.id;
+        area.insertAdjacentHTML("beforeend", `
+          <div class="team-card ${selected ? "selected" : ""}">
+            <h3><span class="team-color" style="background:${team.color}"></span>${team.name}</h3>
+            <button data-select-team="${team.id}" ${selected ? "disabled" : ""}>
+              ${selected ? "Seçili takım" : "Bu takımı seç"}
+            </button>
+          </div>
+        `);
+      }
+
+      const selectedTeam = teamById(state.team);
+      document.getElementById("rosterText").textContent =
+        `${selectedTeam.name}: 11 oyuncu — 1 kaleci, 4 savunma, 3 orta saha ve 3 forvet.`;
+
+      document.getElementById("teamInfoBox").innerHTML =
+        `Takım: <strong>${selectedTeam.name}</strong><br>` +
+        `Forma rengi: ${state.kitColor}<br>` +
+        `Takım gücü: <strong>${computeTeamPower()}</strong>`;
+    }
+
+    function renderShop() {
+      const area = document.getElementById("shopItems");
+      area.innerHTML = "";
+
+      for (const item of shopItems) {
+        const owned = state.inventory.includes(item.id);
+        area.insertAdjacentHTML("beforeend", `
+          <div class="shop-card">
+            <h3>${item.emoji} ${item.name}</h3>
+            <p>${item.description}</p>
+            <p>Fiyat: <strong>${item.price} 🪙</strong></p>
+            <button class="gold-button" data-buy="${item.id}" ${owned ? "disabled" : ""}>
+              ${owned ? "Satın alındı" : "Satın al"}
+            </button>
+          </div>
+        `);
+      }
+    }
+
+    function renderTransferMarket() {
+      const area = document.getElementById("transferMarket");
+      area.innerHTML = "";
+
+      for (const item of transferMarket) {
+        const bought = state.transfers.includes(item.id);
+        area.insertAdjacentHTML("beforeend", `
+          <div class="transfer-card">
+            <h3>${item.emoji} ${item.name}</h3>
+            <p>${item.position}</p>
+            <p>+${item.bonus} ${statNames[item.stat] || item.stat}</p>
+            <p>Fiyat: <strong>${item.price} 🪙</strong></p>
+            <button class="gold-button" data-buy-transfer="${item.id}" ${bought ? "disabled" : ""}>
+              ${bought ? "Transfer edildi" : "Transfer al"}
+            </button>
+          </div>
+        `);
+      }
+    }
+
+    function renderLeagueTable() {
+      const table = document.getElementById("leagueTable");
+      const rows = Object.values(state.league.table)
+        .sort((a, b) =>
+          b.points - a.points ||
+          (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst) ||
+          b.goalsFor - a.goalsFor
+        )
+        .map((team, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${team.name}</td>
+            <td>${team.played}</td>
+            <td>${team.wins}</td>
+            <td>${team.draws}</td>
+            <td>${team.losses}</td>
+            <td>${team.goalsFor}</td>
+            <td>${team.goalsAgainst}</td>
+            <td>${team.points}</td>
+          </tr>
+        `).join("");
+
+      table.innerHTML = `
+        <thead>
+          <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AG</th><th>YG</th><th>P</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      `;
+
+      const finished = state.league.round > 5;
+      document.getElementById("leagueRound").textContent = finished
+        ? "Sezon tamamlandı! Yeni sezon başlatabilirsin."
+        : `Sezon 1 — ${state.league.round}. maç / 5`;
+      document.getElementById("newSeason").hidden = !finished;
+
+      const target = state.league.round > 5 ? "Sezon bitti" : `Bir sonraki maç: ${teamById(state.team).name} vs ${teamById(state.league.currentOpponent).name}`;
+      document.getElementById("seasonTargetText").textContent = target;
+    }
+
+    function renderFixtures() {
+      const list = document.getElementById("fixtureList");
+      list.innerHTML = "";
+
+      const rivals = allTeams.filter(team => team.id !== state.team);
+
+      for (let round = 1; round <= 5; round++) {
+        const rival = rivals[(round - 1) % rivals.length];
+        const played = round < state.league.round;
+        const current = round === state.league.round && state.league.round <= 5;
+        const result = state.league.results.find(item => item.round === round);
+
+        list.insertAdjacentHTML("beforeend", `
+          <div class="fixture-item">
+            ${current ? "▶️ " : ""}${round}. Maç: ${teamById(state.team).name} - ${rival.name}
+            ${played && result ? ` — ${result.homeGoals} : ${result.awayGoals} ✅` : ""}
+          </div>
+        `);
+      }
+    }
+
+    function updateLeagueResult(homeId, awayId, homeGoals, awayGoals) {
+      const home = state.league.table[homeId];
+      const away = state.league.table[awayId];
+      if (!home || !away) return;
+
+      home.played++;
+      away.played++;
+      home.goalsFor += homeGoals;
+      home.goalsAgainst += awayGoals;
+      away.goalsFor += awayGoals;
+      away.goalsAgainst += homeGoals;
+
+      if (homeGoals > awayGoals) {
+        home.wins++;
+        home.points += 3;
+        away.losses++;
+      } else if (homeGoals < awayGoals) {
+        away.wins++;
+        away.points += 3;
+        home.losses++;
+      } else {
+        home.draws++;
+        away.draws++;
+        home.points++;
+        away.points++;
+      }
+
+      state.league.results.push({
+        round: state.league.round,
+        homeId,
+        awayId,
+        homeGoals,
+        awayGoals
+      });
+
+      state.league.round = Math.min(6, state.league.round + 1);
+      state.league.currentOpponent = getOpponentForRound(state.league.round).id;
+      save();
+      renderLeagueTable();
+      renderFixtures();
+    }
+
+    function populateTeamSelects() {
+      const homeSelect = document.getElementById("homeTeam");
+      const awaySelect = document.getElementById("awayTeam");
+
+      homeSelect.innerHTML = allTeams.map(team =>
+        `<option value="${team.id}">${team.name}</option>`
+      ).join("");
+
+      awaySelect.innerHTML = allTeams
+        .filter(team => team.id !== state.team)
+        .map(team => `<option value="${team.id}">${team.name}</option>`)
+        .join("");
+
+      homeSelect.value = state.team;
+
+      const targetAway = state.league.currentOpponent || getOpponentForRound(state.league.round).id;
+      if (allTeams.some(team => team.id === targetAway) && targetAway !== state.team) {
+        awaySelect.value = targetAway;
+      } else {
+        const fallback = getOpponentForRound(state.league.round).id;
+        awaySelect.value = fallback;
+        state.league.currentOpponent = fallback;
+      }
+    }
+
+    document.querySelectorAll("nav button").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("nav button").forEach(item => item.classList.remove("active"));
+        document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
+        button.classList.add("active");
+        document.getElementById(button.dataset.view).classList.add("active");
+      });
+    });
+
+    document.getElementById("playerName").addEventListener("change", event => {
+      state.playerName = event.target.value.trim() || "Genç Yetenek";
+      save();
+      renderStats();
+    });
+
+    document.querySelectorAll("[data-train]").forEach(button => {
+      button.addEventListener("click", () => {
+        const stat = button.dataset.train;
+
+        if (state.coins < 5) {
+          alert("Antrenman için 5 paran olmalı. Maç oynayarak para kazanabilirsin.");
+          return;
+        }
+        if (state.stats[stat] >= 100) {
+          alert("Bu özellik zaten en yüksek seviyede!");
+          return;
+        }
+
+        state.coins -= 5;
+        state.stats[stat] = Math.min(100, state.stats[stat] + 3);
+        state.xp += 2;
+        state.level = Math.floor(state.xp / 20) + 1;
+        save();
+        renderStats();
+      });
+    });
+
+    document.getElementById("teamCards").addEventListener("click", event => {
+      const button = event.target.closest("[data-select-team]");
+      if (!button) return;
+
+      state.team = button.dataset.selectTeam;
+      state.kitColor = teamById(state.team).color;
+
+      const currentAway = document.getElementById("awayTeam").value;
+      if (currentAway === state.team) {
+        const foe = getOpponentForRound(state.league.round);
+        state.league.currentOpponent = foe.id;
+      } else {
+        state.league.currentOpponent = currentAway;
+      }
+
+      save();
+      renderStats();
+      populateTeamSelects();
+      drawIdlePitch();
+      renderFixtures();
+    });
+
+    document.getElementById("kitColor").addEventListener("input", event => {
+      state.kitColor = event.target.value;
+      save();
+      drawIdlePitch();
+      renderStats();
+    });
+
+    document.getElementById("avatarChoice").addEventListener("change", event => {
+      state.avatar = event.target.value;
+      document.getElementById("avatar").textContent = state.avatar;
+      save();
+      renderStats();
+    });
+
+    document.getElementById("shopItems").addEventListener("click", event => {
+      const button = event.target.closest("[data-buy]");
+      if (!button) return;
+
+      const item = shopItems.find(entry => entry.id === button.dataset.buy);
+      if (!item || state.inventory.includes(item.id)) return;
+
+      if (state.coins < item.price) {
+        alert("Bu eşyayı almak için yeterli paran yok.");
+        return;
+      }
+
+      state.coins -= item.price;
+      state.inventory.push(item.id);
+      state.stats[item.stat] = Math.min(100, state.stats[item.stat] + item.bonus);
+      save();
+      renderStats();
+    });
+
+    document.getElementById("transferMarket").addEventListener("click", event => {
+      const button = event.target.closest("[data-buy-transfer]");
+      if (!button) return;
+
+      const item = transferMarket.find(entry => entry.id === button.dataset.buyTransfer);
+      if (!item || state.transfers.includes(item.id)) return;
+
+      if (state.coins < item.price) {
+        alert("Bu transfer için yeterli paran yok.");
+        return;
+      }
+
+      state.coins -= item.price;
+      state.transfers.push(item.id);
+      state.stats[item.stat] = Math.min(100, state.stats[item.stat] + item.bonus);
+      save();
+      renderStats();
+    });
+
+    const canvas = document.getElementById("pitch");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+    const goalTop = H / 2 - 68;
+    const goalBottom = H / 2 + 68;
+
+    const match = {
+      running: false,
+      paused: false,
+      elapsed: 0,
+      lastFrame: 0,
+      homeScore: 0,
+      awayScore: 0,
+      home: [],
+      away: [],
+      ball: null,
+      decisionTimer: 0,
+      tackleCooldown: 0,
+      interceptCooldown: 0,
+      logs: [],
+      stats: {
+        home: { shots: 0, passes: 0, tackles: 0, goals: 0 },
+        away: { shots: 0, passes: 0, tackles: 0, goals: 0 }
+      },
+      message: "Maç için hazır"
+    };
+
+    function formatClock(seconds) {
+      const total = Math.max(0, Math.floor(seconds));
+      return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+    }
+
+    function updateClockDisplay() {
+      document.getElementById("matchClock").textContent = formatClock(match.elapsed);
+    }
+
+    function updateLiveScore() {
+      document.getElementById("liveScore").textContent = `${match.homeScore} - ${match.awayScore}`;
+    }
+
+    function renderLogs() {
+      const list = document.getElementById("eventLog");
+      list.innerHTML = "";
+
+      if (!match.logs.length) {
+        const li = document.createElement("li");
+        li.textContent = "Maç henüz başlamadı.";
+        list.appendChild(li);
+        return;
+      }
+
+      for (const item of match.logs.slice(0, 8)) {
+        const li = document.createElement("li");
+        li.textContent = `${formatClock(item.time)} — ${item.text}`;
+        list.appendChild(li);
+      }
+    }
+
+    function addLog(text) {
+      match.logs.unshift({ text, time: match.elapsed });
+      match.logs = match.logs.slice(0, 8);
+      renderLogs();
+    }
+
+    function updatePerformanceSummary() {
+      const home = match.stats.home;
+      const away = match.stats.away;
+      document.getElementById("performanceSummary").innerHTML =
+        `Takım performansı<br>` +
+        `• Senin takımın: ${home.goals} gol, ${home.shots} şut, ${home.passes} pas, ${home.tackles} müdahale<br>` +
+        `• Rakip: ${away.goals} gol, ${away.shots} şut, ${away.passes} pas, ${away.tackles} müdahale`;
+    }
+
+    function recordAction(side, type) {
+      const stats = match.stats[side];
+      if (!stats) return;
+
+      if (type === "shots") stats.shots += 1;
+      if (type === "passes") stats.passes += 1;
+      if (type === "tackles") stats.tackles += 1;
+      if (type === "goals") stats.goals += 1;
+
+      updatePerformanceSummary();
+    }
+
+    function makeTeam(teamInfo, side) {
+      const formation = [
+        [0.08, 0.50],
+        [0.20, 0.18], [0.20, 0.39], [0.20, 0.61], [0.20, 0.82],
+        [0.39, 0.22], [0.39, 0.50], [0.39, 0.78],
+        [0.57, 0.20], [0.57, 0.50], [0.57, 0.80]
+      ];
+
+      return formation.map(([nx, ny], index) => {
+        const x = (side === "home" ? nx : 1 - nx) * W;
+        return {
+          x,
+          y: ny * H,
+          baseX: x,
+          baseY: ny * H,
+          side,
+          index,
+          color: side === "home" ? state.kitColor : teamInfo.color,
+          dark: teamInfo.dark,
+          teamName: teamInfo.name,
+          number: index + 1
+        };
+      });
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function distance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function allPlayers() {
+      return [...match.home, ...match.away];
+    }
+
+    function nearestPlayer(players, target) {
+      if (!players || players.length === 0) return null;
+      return players.reduce((best, player) => {
+        const d = distance(player, target);
+        return !best || d < best.distance ? { player, distance: d } : best;
+      }, null);
+    }
+
+    function nearestOpponent(owner) {
+      const rivals = (owner.side === "home" ? match.away : match.home)
+        .filter(player => player.index !== 0);
+      const nearest = nearestPlayer(rivals, owner);
+      return nearest ? nearest.distance : 9999;
+    }
+
+    function findForwardPass(owner) {
+      const teammates = (owner.side === "home" ? match.home : match.away)
+        .filter(player => player !== owner && player.index !== 0);
+
+      if (!teammates.length) return null;
+
+      const direction = owner.side === "home" ? 1 : -1;
+      const forward = teammates.filter(player => (player.x - owner.x) * direction > 10);
+      const choices = forward.length ? forward : teammates;
+
+      return choices.reduce((best, player) => {
+        const progress = (player.x - owner.x) * direction;
+        const passDistance = distance(owner, player);
+        const score = progress * 0.35 - passDistance * 0.3;
+        return !best || score > best.score ? { player, score } : best;
+      }, null).player;
+    }
+
+    function kickBall(owner, target, power, receiver = null) {
+      const ball = match.ball;
+      const dx = target.x - owner.x;
+      const dy = target.y - owner.y;
+      const length = Math.max(1, Math.hypot(dx, dy));
+
+      ball.owner = null;
+      ball.receiver = receiver;
+      ball.x = owner.x;
+      ball.y = owner.y;
+      ball.vx = (dx / length) * power;
+      ball.vy = (dy / length) * power;
+    }
+
+    function moveToward(player, targetX, targetY, speed, dt) {
+      const dx = targetX - player.x;
+      const dy = targetY - player.y;
+      const length = Math.hypot(dx, dy);
+
+      if (length > 1) {
+        const step = Math.min(length, speed * dt);
+        player.x += (dx / length) * step;
+        player.y += (dy / length) * step;
+      }
+
+      player.x = clamp(player.x, 25, W - 25);
+      player.y = clamp(player.y, 26, H - 26);
+    }
+
+    function resetMatch() {
+      const home = teamById(document.getElementById("homeTeam").value);
+      const away = teamById(document.getElementById("awayTeam").value || state.league.currentOpponent || getOpponentForRound(state.league.round).id);
+
+      match.home = makeTeam(home, "home");
+      match.away = makeTeam(away, "away");
+
+      match.ball = {
+        x: W / 2,
+        y: H / 2,
+        vx: 0,
+        vy: 0,
+        owner: match.home[9],
+        receiver: null
+      };
+
+      match.elapsed = 0;
+      match.homeScore = 0;
+      match.awayScore = 0;
+      match.tackleCooldown = 0;
+      match.interceptCooldown = 0;
+      match.decisionTimer = 0.5;
+      match.logs = [];
+      match.stats = {
+        home: { shots: 0, passes: 0, tackles: 0, goals: 0 },
+        away: { shots: 0, passes: 0, tackles: 0, goals: 0 }
+      };
+      match.message = "Maç başladı!";
+      addLog("Maç başladı.");
+      updateLiveScore();
+      updateClockDisplay();
+      updatePerformanceSummary();
+      updateResult("Maç başladı! Oyuncular sahada otomatik oynuyor.");
+      drawPitch();
+    }
+
+    function makeDecision(dt) {
+      match.decisionTimer -= dt;
+      const ball = match.ball;
+      if (!ball || !ball.owner || match.decisionTimer > 0) return;
+
+      const owner = ball.owner;
+      const direction = owner.side === "home" ? 1 : -1;
+      const goalX = owner.side === "home" ? W - 10 : 10;
+      const distanceToGoal = Math.abs(goalX - owner.x);
+      const pressure = nearestOpponent(owner);
+      const teammate = findForwardPass(owner);
+      const passing = Number(state.stats.passing) || 38;
+      const shooting = Number(state.stats.shooting) || 30;
+
+      match.decisionTimer = 0.75 + Math.random() * 0.45;
+
+      if (distanceToGoal < 330 && Math.random() < 0.72) {
+        const targetY = H / 2 + (Math.random() - 0.5) * 70;
+        kickBall(owner, { x: goalX, y: targetY }, 400 + shooting * 0.8);
+        recordAction(owner.side, "shots");
+        match.message = `${owner.teamName} şut çekti!`;
+        addLog(match.message);
+        updateResult(`${match.message}<br>Skor: ${match.homeScore} - ${match.awayScore}`);
+        return;
+      }
+
+      if (teammate && (pressure < 125 || Math.random() < 0.68)) {
+        const target = {
+          x: clamp(teammate.x + direction * 10, 30, W - 30),
+          y: clamp(teammate.y, 30, H - 30)
+        };
+        kickBall(owner, target, 250 + passing * 0.7, teammate);
+        recordAction(owner.side, "passes");
+        match.message = `${owner.teamName} pas verdi.`;
+        addLog(match.message);
+        updateResult(`${match.message}<br>Skor: ${match.homeScore} - ${match.awayScore}`);
+      }
+    }
+
+    function updatePlayers(dt) {
+      if (!match.ball) return;
+
+      const ball = match.ball;
+      const players = allPlayers();
+      const owner = ball.owner;
+      const looseChaser = owner ? null : nearestPlayer(players, ball);
+
+      for (const player of players) {
+        const direction = player.side === "home" ? 1 : -1;
+        let targetX = player.baseX;
+        let targetY = player.baseY;
+
+        if (player.index === 0) {
+          targetY = clamp(ball.y, H * 0.34, H * 0.66);
+        } else if (!owner && ball.receiver === player) {
+          targetX = ball.x;
+          targetY = ball.y;
+        } else if (!owner && looseChaser && looseChaser.player === player) {
+          targetX = ball.x;
+          targetY = ball.y;
+        } else if (owner && player === owner) {
+          targetX = player.x + direction * 55;
+          targetY = H / 2 + (player.baseY - H / 2) * 0.25;
+        } else if (owner && player.side !== owner.side) {
+          const defenders = (owner.side === "home" ? match.away : match.home)
+            .filter(p => p.index !== 0);
+          const nearestDefender = nearestPlayer(defenders, owner);
+
+          if (nearestDefender && nearestDefender.player === player) {
+            targetX = owner.x;
+            targetY = owner.y;
+          } else {
+            targetX += (ball.x - W / 2) * 0.08;
+            targetY += (ball.y - H / 2) * 0.08;
+          }
+        } else if (owner) {
+          targetX += (owner.x - player.baseX) * 0.18;
+          targetY += (owner.y - player.baseY) * 0.16;
+        } else {
+          targetX += (ball.x - W / 2) * 0.06;
+          targetY += (ball.y - H / 2) * 0.06;
+        }
+
+        const speedBonus = player.side === "home" ? (Number(state.stats.speed) || 42) * 0.12 : 0;
+
+        moveToward(
+          player,
+          clamp(targetX, 30, W - 30),
+          clamp(targetY, 30, H - 30),
+          90 + speedBonus,
+          dt
+        );
+      }
+    }
+
+    function scoreGoal(side) {
+      if (side === "home") {
+        match.homeScore++;
+        match.message = "GOOOL! Senin takımın gol attı!";
+        recordAction("home", "goals");
+      } else {
+        match.awayScore++;
+        match.message = "Rakip gol attı!";
+        recordAction("away", "goals");
+      }
+
+      addLog(match.message);
+      updateLiveScore();
+
+      match.ball = {
+        x: W / 2,
+        y: H / 2,
+        vx: 0,
+        vy: 0,
+        owner: side === "home" ? match.away[9] : match.home[9],
+        receiver: null
+      };
+
+      match.decisionTimer = 1.1;
+      updateResult(`${match.message}<br>Skor: <strong>${match.homeScore} - ${match.awayScore}</strong>`);
+    }
+
+    function updateBall(dt) {
+      const ball = match.ball;
+      if (!ball) return;
+
+      match.tackleCooldown = Math.max(0, match.tackleCooldown - dt);
+      match.interceptCooldown = Math.max(0, match.interceptCooldown - dt);
+
+      if (ball.owner) {
+        const owner = ball.owner;
+        const defenders = (owner.side === "home" ? match.away : match.home)
+          .filter(player => player.index !== 0);
+        const nearestDefender = nearestPlayer(defenders, owner);
+
+        if (nearestDefender && nearestDefender.distance < 24 && match.tackleCooldown <= 0) {
+          match.tackleCooldown = 1.0;
+
+          if (Math.random() < 0.08) {
+            const defendingSide = owner.side === "home" ? "away" : "home";
+            ball.owner = nearestDefender.player;
+            ball.receiver = null;
+            match.decisionTimer = 0.6;
+            recordAction(defendingSide, "tackles");
+            match.message = "Savunmacı topu kaptı!";
+            addLog(match.message);
+          }
+        }
+
+        const currentOwner = ball.owner;
+        const direction = currentOwner.side === "home" ? 1 : -1;
+        currentOwner.x = clamp(currentOwner.x, 25, W - 25);
+        currentOwner.y = clamp(currentOwner.y, 26, H - 26);
+        ball.x = currentOwner.x + direction * 13;
+        ball.y = currentOwner.y;
+        return;
+      }
+
+      ball.x += ball.vx * dt;
+      ball.y += ball.vy * dt;
+
+      const friction = Math.pow(0.99, dt * 60);
+      ball.vx *= friction;
+      ball.vy *= friction;
+
+      if (Math.abs(ball.vx) < 0.05) ball.vx = 0;
+      if (Math.abs(ball.vy) < 0.05) ball.vy = 0;
+
+      if (ball.y < 18 || ball.y > H - 18) {
+        ball.y = clamp(ball.y, 18, H - 18);
+        ball.vy *= -0.75;
+      }
+
+      const inGoalMouth = ball.y >= goalTop && ball.y <= goalBottom;
+
+      if (ball.x >= W - 12 && inGoalMouth) {
+        scoreGoal("home");
+        return;
+      }
+      if (ball.x <= 12 && inGoalMouth) {
+        scoreGoal("away");
+        return;
+      }
+
+      if (ball.x < 18 || ball.x > W - 18) {
+        ball.x = clamp(ball.x, 18, W - 18);
+        ball.vx *= -0.7;
+      }
+
+      if (ball.receiver && distance(ball.receiver, ball) < 27) {
+        ball.owner = ball.receiver;
+        ball.receiver = null;
+        ball.vx = 0;
+        ball.vy = 0;
+        match.decisionTimer = 0.5;
+        match.message = "Pas başarıyla alındı!";
+        addLog(match.message);
+        return;
+      }
+
+      const nearest = nearestPlayer(allPlayers(), ball);
+      const speed = Math.hypot(ball.vx, ball.vy);
+
+      if (nearest && nearest.distance < 17 && speed < 520) {
+        ball.owner = nearest.player;
+        ball.receiver = null;
+        ball.vx = 0;
+        ball.vy = 0;
+        match.decisionTimer = 0.5;
+      }
+    }
+
+    function drawPlayers(players) {
+      for (const player of players) {
+        ctx.beginPath();
+        ctx.ellipse(player.x, player.y + 7, 13, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, 13, 0, Math.PI * 2);
+        ctx.fillStyle = player.color;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = player.dark;
+        ctx.stroke();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 10px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(String(player.number), player.x, player.y);
+      }
+    }
+
+    function drawPitch() {
+      ctx.clearRect(0, 0, W, H);
+
+      for (let i = 0; i < 10; i++) {
+        ctx.fillStyle = i % 2 ? "#238848" : "#2b9a50";
+        ctx.fillRect(i * W / 10, 0, W / 10, H);
+      }
+
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(18, 18, W - 36, H - 36);
+
+      ctx.beginPath();
+      ctx.moveTo(W / 2, 18);
+      ctx.lineTo(W / 2, H - 18);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(W / 2, H / 2, 70, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = "#e7e7e7";
+      ctx.fillRect(0, goalTop, 24, goalBottom - goalTop);
+      ctx.fillRect(W - 24, goalTop, 24, goalBottom - goalTop);
+      ctx.strokeRect(0, goalTop, 24, goalBottom - goalTop);
+      ctx.strokeRect(W - 24, goalTop, 24, goalBottom - goalTop);
+      ctx.strokeRect(18, H / 2 - 125, 110, 250);
+      ctx.strokeRect(W - 128, H / 2 - 125, 110, 250);
+
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(W / 2 - 80, 22, 160, 38);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 23px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(`${match.homeScore} - ${match.awayScore}`, W / 2, 49);
+
+      drawPlayers(match.home);
+      drawPlayers(match.away);
+
+      if (match.ball) {
+        ctx.beginPath();
+        ctx.arc(match.ball.x, match.ball.y, 9, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#222";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(match.ball.x, match.ball.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#222";
+        ctx.fill();
+      }
+
+      if (!match.running) {
+        ctx.fillStyle = "rgba(0,0,0,0.32)";
+        ctx.fillRect(0, H / 2 - 25, W, 50);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 20px Arial";
+        ctx.fillText(match.message || "Maç için hazır", W / 2, H / 2 + 7);
+      }
+    }
+
+    function drawIdlePitch() {
+      if (match.running) return;
+
+      const home = teamById(document.getElementById("homeTeam").value || state.team);
+      const away = teamById(document.getElementById("awayTeam").value || state.league.currentOpponent || "yellow");
+
+      match.home = makeTeam(home, "home");
+      match.away = makeTeam(away, "away");
+
+      match.ball = {
+        x: W / 2,
+        y: H / 2,
+        vx: 0,
+        vy: 0,
+        owner: null,
+        receiver: null
+      };
+
+      match.message = "Maç için hazır";
+      updateLiveScore();
+      updateClockDisplay();
+      drawPitch();
+    }
+
+    function updateResult(text) {
+      document.getElementById("result").innerHTML = text;
+    }
+
+    function endMatch() {
+      match.running = false;
+      match.paused = false;
+      document.getElementById("pauseMatch").hidden = true;
+      document.getElementById("startMatch").disabled = false;
+
+      const homeId = document.getElementById("homeTeam").value;
+      const awayId = document.getElementById("awayTeam").value;
+      const homeGoals = match.homeScore;
+      const awayGoals = match.awayScore;
+
+      if (homeId && awayId && state.league.round <= 5) {
+        updateLeagueResult(homeId, awayId, homeGoals, awayGoals);
+      }
+
+      let message = "Maç berabere bitti.";
+      if (homeGoals > awayGoals) message = "Harika! Takımın maçı kazandı.";
+      if (homeGoals < awayGoals) message = "Bu kez rakip kazandı. Antrenman yapıp tekrar dene.";
+
+      state.coins += 10;
+      state.xp += 10;
+      state.level = Math.floor(state.xp / 20) + 1;
+      save();
+      renderStats();
+
+      match.message = `Maç bitti: ${homeGoals} - ${awayGoals}`;
+      addLog("Maç sona erdi.");
+      updateLiveScore();
+      updateClockDisplay();
+      updatePerformanceSummary();
+      drawPitch();
+
+      updateResult(
+        `<strong>Maç bitti: ${homeGoals} - ${awayGoals}</strong><br>` +
+        `${message}<br>Ödül: +10 🪙 ve +10 tecrübe`
+      );
+    }
+
+    function frame(timestamp) {
+      if (!match.running || match.paused) return;
+
+      const realDt = Math.min((timestamp - (match.lastFrame || timestamp)) / 1000, 0.05);
+      match.lastFrame = timestamp;
+
+      const speed = Number(document.getElementById("matchSpeed").value);
+      const dt = realDt * speed;
+      match.elapsed += dt;
+
+      updatePlayers(dt);
+      makeDecision(dt);
+      updateBall(dt);
+      updateLiveScore();
+      updateClockDisplay();
+      drawPitch();
+
+      if (match.elapsed >= 60) {
+        endMatch();
+        return;
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    document.getElementById("startMatch").addEventListener("click", () => {
+      if (match.running) return;
+
+      if (state.league.round > 5) {
+        alert("Sezon tamamlandı. Lig sekmesinden yeni sezon başlatabilirsin.");
+        return;
+      }
+
+      resetMatch();
+      match.running = true;
+      match.paused = false;
+      match.lastFrame = 0;
+
+      document.getElementById("startMatch").disabled = true;
+      document.getElementById("pauseMatch").hidden = false;
+      document.getElementById("pauseMatch").textContent = "Duraklat";
+      requestAnimationFrame(frame);
+    });
+
+    document.getElementById("pauseMatch").addEventListener("click", event => {
+      if (!match.running) return;
+
+      match.paused = !match.paused;
+      event.target.textContent = match.paused ? "Devam et" : "Duraklat";
+
+      if (!match.paused) {
+        match.lastFrame = 0;
+        requestAnimationFrame(frame);
+      }
+    });
+
+    document.getElementById("homeTeam").addEventListener("change", () => {
+      state.team = document.getElementById("homeTeam").value;
+      state.kitColor = teamById(state.team).color;
+
+      const selectedAway = document.getElementById("awayTeam").value;
+      if (selectedAway === state.team) {
+        const foe = getOpponentForRound(state.league.round);
+        state.league.currentOpponent = foe.id;
+      } else {
+        state.league.currentOpponent = selectedAway;
+      }
+
+      save();
+      renderStats();
+      populateTeamSelects();
+      drawIdlePitch();
+    });
+
+    document.getElementById("awayTeam").addEventListener("change", () => {
+      state.league.currentOpponent = document.getElementById("awayTeam").value;
+      save();
+      drawIdlePitch();
+    });
+
+    document.getElementById("newSeason").addEventListener("click", () => {
+      state.league.round = 1;
+      state.league.currentOpponent = getOpponentForRound(1).id;
+      state.league.table = makeEmptyTable();
+      state.league.results = [];
+      save();
+      renderLeagueTable();
+      renderFixtures();
+      populateTeamSelects();
+      drawIdlePitch();
+    });
+
+    populateTeamSelects();
+    renderStats();
+    renderLeagueTable();
+    renderFixtures();
+    renderLogs();
+    updatePerformanceSummary();
+    updateLiveScore();
+    updateClockDisplay();
+    drawIdlePitch();
+  </script>
+</body>
+</html>
